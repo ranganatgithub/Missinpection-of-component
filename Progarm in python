@@ -1,0 +1,259 @@
+//Step 1: Screen Monitoring using OpenCV
+
+import cv2
+import numpy as np
+
+def monitor_screen():
+    cap = cv2.VideoCapture(0)  # Use screen recording or external camera
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+        # Define color ranges
+        red_lower = np.array([0, 120, 70])
+        red_upper = np.array([10, 255, 255])
+        green_lower = np.array([40, 40, 40])
+        green_upper = np.array([80, 255, 255])
+
+        # Mask for colors
+        red_mask = cv2.inRange(hsv, red_lower, red_upper)
+        green_mask = cv2.inRange(hsv, green_lower, green_upper)
+
+        if cv2.countNonZero(red_mask) > 1000:  # If red detected
+            return "RED"
+        elif cv2.countNonZero(green_mask) > 1000:  # If green detected
+            return "GREEN"
+
+        cv2.imshow("Monitoring", frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+//Step 2: Tkinter Popup for Alerts
+
+import tkinter as tk
+from tkinter import messagebox
+import serial
+
+def show_alert():
+    root = tk.Tk()
+    root.withdraw()
+    messagebox.showerror("Error", "Invalid Component Detected! Line Stopped.")
+    trigger_buzzer()
+    request_leader_scan()
+    root.destroy()
+
+def trigger_buzzer():
+    arduino = serial.Serial('COM3', 9600)  # Adjust port as needed
+    arduino.write(b'1')  # Send signal to trigger buzzer
+    arduino.close()
+
+
+Here's a breakdown of the barcode scanning system you described, along with step-by-step implementation and sample code.
+
+Project Steps
+1. System Overview
+The system performs the following functions:
+
+Continuously monitors the screen using OpenCV to detect barcode colors.
+Analyzes the scanned image and determines validity (green = valid, red = invalid).
+If invalid, triggers an alert via Tkinter popup and an Arduino buzzer.
+Requires the line leader to scan their ID to resolve the issue.
+Stores all data in an SQL database for tracking.
+Automatically resumes production after resolution.
+2. Required Technologies
+Python Libraries: OpenCV, Tkinter, Serial, SQLite/MySQL
+Hardware: Arduino with a buzzer and RFID/ID scanner
+Machine Learning: Image processing for color detection
+3. Implementation Steps with Code
+Step 1: Screen Monitoring using OpenCV
+python
+Copy
+Edit
+import cv2
+import numpy as np
+
+def monitor_screen():
+    cap = cv2.VideoCapture(0)  # Use screen recording or external camera
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+        # Define color ranges
+        red_lower = np.array([0, 120, 70])
+        red_upper = np.array([10, 255, 255])
+        green_lower = np.array([40, 40, 40])
+        green_upper = np.array([80, 255, 255])
+
+        # Mask for colors
+        red_mask = cv2.inRange(hsv, red_lower, red_upper)
+        green_mask = cv2.inRange(hsv, green_lower, green_upper)
+
+        if cv2.countNonZero(red_mask) > 1000:  # If red detected
+            return "RED"
+        elif cv2.countNonZero(green_mask) > 1000:  # If green detected
+            return "GREEN"
+
+        cv2.imshow("Monitoring", frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+Step 2: Tkinter Popup for Alerts
+python
+Copy
+Edit
+import tkinter as tk
+from tkinter import messagebox
+import serial
+
+def show_alert():
+    root = tk.Tk()
+    root.withdraw()
+    messagebox.showerror("Error", "Invalid Component Detected! Line Stopped.")
+    trigger_buzzer()
+    request_leader_scan()
+    root.destroy()
+
+def trigger_buzzer():
+    arduino = serial.Serial('COM3', 9600)  # Adjust port as needed
+    arduino.write(b'1')  # Send signal to trigger buzzer
+    arduino.close()
+
+Step 3: Arduino Buzzer Control (Arduino Code)
+
+int buzzer = 9;
+
+void setup() {
+  pinMode(buzzer, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    char command = Serial.read();
+    if (command == '1') {
+      digitalWrite(buzzer, HIGH);
+      delay(3000);
+      digitalWrite(buzzer, LOW);
+    }
+  }
+}
+
+
+Here's a breakdown of the barcode scanning system you described, along with step-by-step implementation and sample code.
+
+Project Steps
+1. System Overview
+The system performs the following functions:
+
+Continuously monitors the screen using OpenCV to detect barcode colors.
+Analyzes the scanned image and determines validity (green = valid, red = invalid).
+If invalid, triggers an alert via Tkinter popup and an Arduino buzzer.
+Requires the line leader to scan their ID to resolve the issue.
+Stores all data in an SQL database for tracking.
+Automatically resumes production after resolution.
+2. Required Technologies
+Python Libraries: OpenCV, Tkinter, Serial, SQLite/MySQL
+Hardware: Arduino with a buzzer and RFID/ID scanner
+Machine Learning: Image processing for color detection
+3. Implementation Steps with Code
+Step 1: Screen Monitoring using OpenCV
+python
+Copy
+Edit
+import cv2
+import numpy as np
+
+def monitor_screen():
+    cap = cv2.VideoCapture(0)  # Use screen recording or external camera
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+        # Define color ranges
+        red_lower = np.array([0, 120, 70])
+        red_upper = np.array([10, 255, 255])
+        green_lower = np.array([40, 40, 40])
+        green_upper = np.array([80, 255, 255])
+
+        # Mask for colors
+        red_mask = cv2.inRange(hsv, red_lower, red_upper)
+        green_mask = cv2.inRange(hsv, green_lower, green_upper)
+
+        if cv2.countNonZero(red_mask) > 1000:  # If red detected
+            return "RED"
+        elif cv2.countNonZero(green_mask) > 1000:  # If green detected
+            return "GREEN"
+
+        cv2.imshow("Monitoring", frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+Step 2: Tkinter Popup for Alerts
+python
+Copy
+Edit
+import tkinter as tk
+from tkinter import messagebox
+import serial
+
+def show_alert():
+    root = tk.Tk()
+    root.withdraw()
+    messagebox.showerror("Error", "Invalid Component Detected! Line Stopped.")
+    trigger_buzzer()
+    request_leader_scan()
+    root.destroy()
+
+def trigger_buzzer():
+    arduino = serial.Serial('COM3', 9600)  # Adjust port as needed
+    arduino.write(b'1')  # Send signal to trigger buzzer
+    arduino.close()
+Step 3: Arduino Buzzer Control (Arduino Code)
+cpp
+Copy
+Edit
+int buzzer = 9;
+
+void setup() {
+  pinMode(buzzer, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    char command = Serial.read();
+    if (command == '1') {
+      digitalWrite(buzzer, HIGH);
+      delay(3000);
+      digitalWrite(buzzer, LOW);
+    }
+  }
+}
+
+Step 4: ID Scanning System
+
+def request_leader_scan():
+    id_input = input("Scan your ID to resume operation: ")
+    store_data(id_input, "RED")
+    print("ID accepted. Resuming operation.")
+
